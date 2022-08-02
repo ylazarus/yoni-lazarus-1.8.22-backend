@@ -11,7 +11,8 @@ function connectSockets(http, session) {
         socket.on('disconnect', socket => {
             console.log('Someone disconnected')
         })
-        socket.on('chat topic', topic => {
+        socket.on('chat topic', topic => { // sets user's id as topic
+            console.log('subscribing to topic ', topic)
             if (socket.myTopic === topic) return;
             if (socket.myTopic) {
                 socket.leave(socket.myTopic)
@@ -19,17 +20,20 @@ function connectSockets(http, session) {
             socket.join(topic)
             socket.myTopic = topic
         })
-        socket.on('chat updated', () => {
-            console.log('chat updated, printed from socket');
+        socket.on('chat updated', chat => {
+
             // emits only to sockets subscribed to the specific chat
             // gIo.to(socket.myTopic).emit('someone updated')
-            socket.broadcast.to(socket.myTopic).emit('someone updated')
+            if(chat.sentToId === socket.myTopic  || chat.sentFromId === socket.myTopic){
+                console.log('broadcasting chat');
+                socket.broadcast.to(socket.myTopic).emit('message received', chat)
+            }
         })
         socket.on('user-watch', userId => {
             socket.join('watching:' + userId)
         })
         socket.on('set-user-socket', userId => {
-            logger.debug(`Setting (${socket.id}) socket.userId = ${userId}`)
+            console.log(`Setting (${socket.id}) socket.userId = ${userId}`)
             socket.userId = userId
         })
         socket.on('unset-user-socket', () => {
@@ -45,7 +49,7 @@ function emitTo({ type, data, label }) {
 }
 
 async function emitToUser({ type, data, userId }) {
-    logger.debug('Emiting to user socket: ' + userId)
+    console.log('Emiting to user socket: ' + userId)
     const socket = await _getUserSocket(userId)
     if (socket) socket.emit(type, data)
     else {
@@ -59,11 +63,10 @@ async function broadcast({ type, data, room = null, userId }) {
     console.log('BROADCASTING', JSON.stringify(arguments));
     const excludedSocket = await _getUserSocket(userId)
     if (!excludedSocket) {
-        // logger.debug('Shouldnt happen, socket not found')
-        // _printSockets();
+       
         return;
     }
-    logger.debug('broadcast to all but user: ', userId)
+    console.log('broadcast to all but user: ', userId)
     if (room) {
         excludedSocket.broadcast.to(room).emit(type, data)
     } else {

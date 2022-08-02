@@ -1,3 +1,4 @@
+const userService = require('../user/user.service')
 const dbService = require("../../services/db.service")
 const ObjectId = require("mongodb").ObjectId
 
@@ -14,11 +15,11 @@ async function query(filterBy) {
   }
 }
 
-async function getById(chatId) {
+async function getById(currUserId, chatId) {
   try {
     const collection = await dbService.getCollection("chat")
-    const chat = collection.findOne({ _id: ObjectId(chatId) })
-    return chat
+    const chats = await collection.find({ $or: [{ sentById: currUserId, sentToId: chatId }, { sentById: chatId, sentToId: currUserId }]}).toArray()
+    return chats
   } catch (err) {
     console.log(`while finding chat ${chatId}`, err)
     throw err
@@ -37,6 +38,10 @@ async function remove(chatId) {
 }
 
 async function add(chat) {
+  const sentByUser = await userService.getById(chat.sentById)
+  chat.sentByName = sentByUser.fullname
+  chat.sentAt = Date.now()
+  console.log('adding chat: ', chat);
   try {
     const collection = await dbService.getCollection("chat")
     const addedChat = await collection.insertOne(chat)

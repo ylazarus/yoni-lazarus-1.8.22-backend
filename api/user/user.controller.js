@@ -34,6 +34,19 @@ async function deleteUser(req, res) {
     }
 }
 
+async function updateUsersFriends(req, res) {
+    console.log('updating friends');
+    try {
+        const user = req.body
+        const savedUser = await userService.updateFriends(user)
+        res.send(savedUser)
+    } catch (err) {
+        console.log('Failed to update user', err)
+        res.status(500).send({ err: 'Failed to update user' })
+    }
+}
+
+
 async function updateUser(req, res) {
     try {
         const user = req.body
@@ -49,5 +62,6 @@ module.exports = {
     getUser,
     getUsers,
     deleteUser,
+    updateUsersFriends,
     updateUser
 }

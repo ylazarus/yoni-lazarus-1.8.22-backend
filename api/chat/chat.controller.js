@@ -16,7 +16,8 @@ async function getChats(req, res) {
 async function getChatById(req, res) {
   try {
     const chatId = req.params.id
-    const chat = await chatService.getById(chatId)
+    const currUserId = req.session.user._id
+    const chat = await chatService.getById(currUserId, chatId)
     res.json(chat)
   } catch (err) {
     console.log('Failed to get chat', err)

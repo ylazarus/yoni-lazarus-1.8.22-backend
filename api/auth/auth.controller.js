@@ -7,19 +7,25 @@ async function login(req, res) {
         req.session.user = user
         res.json(user)
     } catch (err) {
-        logger.error('Failed to Login ' + err)
+        console.log('Failed to Login ' + err)
         res.status(401).send({ err: 'Failed to Login' })
     }
 }
 
 async function signup(req, res) {
     try {
-        const { username, password, fullname } = req.body
-       
-        const account = await authService.signup(username, password, fullname)
-        const user = await authService.login(username, password)
-        req.session.user = user
-        res.json(user)
+        const { username, password, fullname, isAdmin } = req.body
+        console.log('doing signup');
+        const account = await authService.signup(username, password, fullname, isAdmin)
+        console.log('got account', account)
+        if (!req.session || !req.session.user) { // don't log in if admin created the account
+            console.log('logging in');
+            const user = await authService.login(username, password)
+            req.session.user = user
+            res.json(user)
+        } else {
+            res.send({ msg: 'Signed up successfully' })
+        }
     } catch (err) {
         console.log('Failed to signup ' + err)
         res.status(500).send({ err: 'Failed to signup' })

@@ -7,6 +7,7 @@ module.exports = {
     getById,
     getByUsername,
     remove,
+    updateFriends,
     update,
     add
 }
@@ -32,12 +33,6 @@ async function getById(userId) {
         const collection = await dbService.getCollection('user')
         const user = await collection.findOne({ _id: ObjectId(userId) })
         delete user.password
-
-        user.givenReviews = await reviewService.query({ byUserId: ObjectId(user._id) })
-        user.givenReviews = user.givenReviews.map(review => {
-            delete review.byUser
-            return review
-        })
 
         return user
     } catch (err) {
@@ -66,14 +61,33 @@ async function remove(userId) {
     }
 }
 
-async function update(user) {
+async function updateFriends(user){
+    console.log('friends to be updated: ', user.friends);
     try {
-        // peek only updatable fields!
         const userToSave = {
-            _id: ObjectId(user._id), // needed for the returnd obj
+            _id: ObjectId(user._id), // needed for the returned obj
             username: user.username,
             fullname: user.fullname,
-            // img: user.img, // if we want to be able to add user images (perhaps even from webcam)
+            isAdmin: user.isAdmin,
+            friends: user.friends
+        }
+        const collection = await dbService.getCollection('user')
+        await collection.updateOne({ _id: userToSave._id }, { $set: userToSave })
+        return userToSave;
+    } catch (err) {
+        console.log(`cannot update user ${user._id}`, err)
+        throw err
+    }
+}
+
+async function update(user) {
+    try {
+        const userToSave = {
+            _id: ObjectId(user._id),
+            username: user.username,
+            fullname: user.fullname,
+            isAdmin: user.isAdmin,
+            friends: user.friends
         }
         const collection = await dbService.getCollection('user')
         await collection.updateOne({ _id: userToSave._id }, { $set: userToSave })
@@ -91,7 +105,7 @@ async function add(user) {
             username: user.username,
             password: user.password,
             fullname: user.fullname,
-            isAdmin: false,
+            isAdmin: user?.isAdmin || false,
             friends: []
         }
         const collection = await dbService.getCollection('user')

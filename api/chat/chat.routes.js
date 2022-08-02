@@ -17,11 +17,8 @@ const router = express.Router()
 
 router.get("/", getChats)
 router.get("/:id", getChatById)
-// router.post("/", requireAuth, requireAdmin, addChat)
+router.post("/", requireAuth, addChat)
 // router.put("/:id", requireAuth, requireAdmin, updateChat)
-// router.delete("/:id", requireAuth, requireAdmin, removeChat)
-router.post("/", addChat)
-router.put("/:id", updateChat)
-router.delete("/:id", removeChat)
+router.delete("/:id", requireAuth, requireAdmin, removeChat)
 
 module.exports = router

@@ -14,7 +14,7 @@ async function login(username, password) {
     return user
 }   
 
-async function signup(username, password, fullname) {
+async function signup(username, password, fullname, isAdmin) {
     const saltRounds = 10
 
     if (!username || !password || !fullname ) return Promise.reject('fullname, username and password are required!')
@@ -23,7 +23,7 @@ async function signup(username, password, fullname) {
     if (userExist) return Promise.reject('Username already taken')
 
     const hash = await bcrypt.hash(password, saltRounds)
-    return userService.add({ username, password: hash, fullname })
+    return userService.add({ username, password: hash, fullname, isAdmin })
 }
 
 module.exports = {
