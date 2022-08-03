@@ -26,7 +26,8 @@ function connectSockets(http, session) {
             // gIo.to(socket.myTopic).emit('someone updated')
             if(chat.sentToId === socket.myTopic  || chat.sentFromId === socket.myTopic){
                 console.log('broadcasting chat');
-                socket.broadcast.to(socket.myTopic).emit('message received', chat)
+                // socket.broadcast.to(socket.myTopic).emit('message received', chat)
+                socket.broadcast.emit('message received', chat)
             }
         })
         socket.on('user-watch', userId => {
