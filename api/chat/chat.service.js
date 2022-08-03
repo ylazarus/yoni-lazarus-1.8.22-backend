@@ -41,7 +41,6 @@ async function add(chat) {
   const sentByUser = await userService.getById(chat.sentById)
   chat.sentByName = sentByUser.fullname
   chat.sentAt = Date.now()
-  console.log('adding chat: ', chat);
   try {
     const collection = await dbService.getCollection("chat")
     const addedChat = await collection.insertOne(chat)
@@ -54,9 +53,7 @@ async function add(chat) {
 }
 async function update(chat) {
   try {
-    console.log("updating chat")
     var id = ObjectId(chat._id)
-    console.log(id)
     delete chat._id
     const collection = await dbService.getCollection("chat")
     await collection.updateOne({ _id: id }, { $set: { ...chat } })
@@ -71,26 +68,12 @@ async function update(chat) {
 function _buildCriteria(filterBy) {
   const criteria = {}
 
-  if (filterBy.name) {
-    criteria.name = { $regex: filterBy.name, $options: "i" }
-  }
+ 
 
   return criteria
 }
 
-function _sort(filteredChats, sortBy) {
-  if (!sortBy) return
-  if (sortBy === "time")
-    filteredChats = filteredChats.sort(
-      (t1, t2) => t1.createdAt - t2.createdAt
-    )
-  else if (filterBy.sortBy === "price")
-    filteredChats = filteredChats.sort((t1, t2) => t1.price - t2.price)
-  else if (filterBy.sortBy === "name")
-    filteredChats = filteredChats.sort((t1, t2) => {
-      return t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1
-    })
-}
+
 
 module.exports = {
   remove,

@@ -15,11 +15,8 @@ async function login(req, res) {
 async function signup(req, res) {
     try {
         const { username, password, fullname, isAdmin } = req.body
-        console.log('doing signup');
         const account = await authService.signup(username, password, fullname, isAdmin)
-        console.log('got account', account)
         if (!req.session || !req.session.user) { // don't log in if admin created the account
-            console.log('logging in');
             const user = await authService.login(username, password)
             req.session.user = user
             res.json(user)

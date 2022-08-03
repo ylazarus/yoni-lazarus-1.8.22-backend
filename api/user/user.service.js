@@ -62,7 +62,6 @@ async function remove(userId) {
 }
 
 async function updateFriends(user){
-    console.log('friends to be updated: ', user.friends);
     try {
         const userToSave = {
             _id: ObjectId(user._id), // needed for the returned obj
